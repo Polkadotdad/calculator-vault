@@ -1,0 +1,51 @@
+plugins {
+    id 'com.android.application'
+}
+
+def ksFile = System.getenv("CV_KEYSTORE_FILE")
+def runNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+
+android {
+    namespace 'com.dhillon.calculatorvault'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.dhillon.calculatorvault"
+        minSdk 26
+        targetSdk 36
+        versionCode runNumber
+        versionName "1.0.${runNumber}"
+    }
+
+    signingConfigs {
+        release {
+            if (ksFile) {
+                storeFile file(ksFile)
+                storePassword System.getenv("CV_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("CV_KEY_ALIAS")
+                keyPassword System.getenv("CV_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (ksFile) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}
