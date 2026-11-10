@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="calc_bg">#FF101418</color>
+    <color name="calc_text">#FFFFFFFF</color>
+    <color name="calc_sub">#FF9AA4AE</color>
+    <color name="key_num">#FF262C33</color>
+    <color name="key_fn">#FF3A424C</color>
+    <color name="key_op">#FFF59E0B</color>
+    <color name="key_eq">#FF22C55E</color>
+    <color name="ripple">#33FFFFFF</color>
+    <color name="vault_primary">#FF1E3A8A</color>
+    <color name="vault_bg">#FFF3F4F6</color>
+    <color name="icon_bg">#FF1E3A8A</color>
+</resources>

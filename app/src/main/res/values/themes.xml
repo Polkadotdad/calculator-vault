@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Calc" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/calc_bg</item>
+        <item name="android:statusBarColor">@color/calc_bg</item>
+        <item name="android:navigationBarColor">@color/calc_bg</item>
+        <item name="android:colorAccent">@color/key_op</item>
+    </style>
+
+    <style name="Theme.Vault" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:colorPrimary">@color/vault_primary</item>
+        <item name="android:colorPrimaryDark">@color/vault_primary</item>
+        <item name="android:colorAccent">@color/vault_primary</item>
+        <item name="android:windowBackground">@color/vault_bg</item>
+    </style>
+
+    <style name="Theme.Viewer" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor">@android:color/black</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+    </style>
+</resources>
