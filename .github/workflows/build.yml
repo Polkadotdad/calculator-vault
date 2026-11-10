@@ -8,8 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
     steps:
       - uses: actions/checkout@v4
 
@@ -30,20 +28,46 @@ jobs:
           gradle-version: '8.14.3'
 
       - name: Prepare signing key
-        if: env.KEYSTORE_BASE64 != ''
+        env:
+          S1: ${{ secrets.KEYSTORE_BASE64 }}
+          S2: ${{ secrets.KEYSTORE_PASSWORD }}
+          S3: ${{ secrets.KEY_DHILLON }}
+          S4: ${{ secrets.KEY_MAMA }}
+          S5: ${{ secrets.KEY_PAPA }}
+          S6: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
-          echo "CV_KEYSTORE_FILE=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
+          clean() { printf '%s' "$1" | tr -d '\r' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^Value:[[:space:]]*//'; }
+          KS="$RUNNER_TEMP/upload.jks"
+          found_ks=""
+          for v in "$S1" "$S2" "$S3" "$S4" "$S5" "$S6"; do
+            if [ ${#v} -gt 1000 ]; then
+              printf '%s' "$v" | tr -d ' \r\n\t' | base64 -d > "$KS" 2>/dev/null && found_ks=1 && break
+            fi
+          done
+          if [ -z "$found_ks" ]; then echo "::warning::No keystore secret found (a secret holding the very long line)."; exit 0; fi
+          for v in "$S1" "$S2" "$S3" "$S4" "$S5" "$S6"; do
+            [ -z "$v" ] && continue
+            [ ${#v} -gt 200 ] && continue
+            pw=$(clean "$v")
+            if keytool -list -keystore "$KS" -storepass "$pw" > /dev/null 2>&1; then
+              echo "::add-mask::$pw"
+              echo "CV_KEYSTORE_FILE=$KS" >> "$GITHUB_ENV"
+              echo "CV_KEYSTORE_PASSWORD=$pw" >> "$GITHUB_ENV"
+              echo "CV_KEY_PASSWORD=$pw" >> "$GITHUB_ENV"
+              echo "SIGNED=1" >> "$GITHUB_ENV"
+              echo "Signing key and password found."
+              exit 0
+            fi
+          done
+          echo "::warning::Keystore found but no secret matched its password."
 
       - name: Build app bundle (.aab) and test APK
         env:
-          CV_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           CV_KEY_ALIAS: upload
-          CV_KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: gradle --no-daemon bundleRelease assembleRelease
 
       - name: Warn if not signed
-        if: env.KEYSTORE_BASE64 == ''
+        if: env.SIGNED != '1'
         run: echo "::warning::No signing secrets set. The .aab is NOT signed and Google Play will reject it. Add the 2 secrets KEYSTORE_PASSWORD and KEYSTORE_BASE64 and run again."
 
       - uses: actions/upload-artifact@v4
